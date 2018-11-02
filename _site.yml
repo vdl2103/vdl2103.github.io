@@ -6,8 +6,8 @@ navbar:
     - text: "About"
       href: about.html
     - icon: fa-envelope fa-lg
-      href: mailto:<tory.lynch@gmail.com.com>
+      href: mailto:<tory.lynch@gmail.com>
     - icon: fa-github fa-lg
-      href: http://github.com/<vdl2103>/
+      href: http://github.com/vdl2103
 output:
   html_document
