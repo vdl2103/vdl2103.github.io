@@ -11,3 +11,6 @@ Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+BuildType: Website
+WebsitePath: ~/Desktop/Data Science/Homeworks/p8105_hw4_vdl2103/p8105_hw4_vdl2103
