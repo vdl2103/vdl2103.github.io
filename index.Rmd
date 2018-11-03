@@ -1,14 +1,14 @@
 ---
-title: "Holy cow!"
+title: "P8105 Homework 4"
 ---
 
-### I have a webpage!
+### Introduction
 
-And I can put all kinds of stuff on it!
+Tory began her PhD in the fall of 2017. She received her MPH in Epidemiology of Microbial Disease from the Yale School of Public Health and her Bachelor’s in Environmental Biology from Georgetown University. Her Master’s research focused on the association between seasonal climatic factors and typhoid fever. At Mailman, she is part of the [Climate and Health Program](mailman.columbia.edu/research/climate-and-health-program) and is studying how extreme climatic events influence the spread of water-borne infectious diseases. 
 
-```{r}
-
-```
-
-[this](google.com)
-[about](about.html)
+<center>
+<figure>
+<img src="./CH group pic 2018.jpg" style="width:80%" align = "bottom">
+<figcaption> Climate and Health Group </figcaption>
+</figure>
+</center>

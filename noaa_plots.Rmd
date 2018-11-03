@@ -1,0 +1,115 @@
+---
+title: "New York State Temperature and Precipitation, 1981 - 2010"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(viridis)
+library(p8105.datasets)
+library(plotly)
+library(rnoaa)
+library(zoo)
+library(lubridate)
+library(patchwork)
+```
+
+The highest temperature ever recorded in New York State is 43 degrees Celsius and the lowest recorded is -47 degrees Celsius, according to the National Climatic Data Center. Temperature observations above and below -47 and 43 degrees Celsius were removed, therefore, under the assumption that values outside that range reflect inaccurate measurements. Precipitation observations that were greater than the highest daily precipitation seen in New York state (~14 inches) were also removed.  
+
+```{r data cleaning, echo = FALSE, include = FALSE}
+#NOAA precip data
+ data("ny_noaa")
+
+noaa_data_cleaned <- ny_noaa %>% 
+  separate(date, c("y", "m", "d")) %>% 
+  mutate_at(vars(y:tmin), funs(as.numeric)) %>% 
+  mutate_at(vars(prcp, tmax:tmin), funs(./10)) %>% #convert precip and temp data into mm and deg C, respectively
+  rename(year = y) %>% 
+  select(-snwd) %>% 
+  filter(tmax < 43 & tmax > -47) %>% #remove inaccurate max temp observations 
+  filter(tmin > -47 & tmin < 43) %>% #remove inaccurate min temp observations
+  filter(prcp < 280) #remove inaccurate precip observations 
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+temp_data <- noaa_data_cleaned %>% 
+  group_by(year,m, d) %>% 
+  summarise(avg_high = mean(tmax, na.rm = TRUE), avg_low = mean(tmin, na.rm = TRUE)) %>% 
+  na.omit() %>% 
+  mutate(time = m + (d/31))
+  
+temp_plot_high <-  plot_ly(temp_data, x = ~time, y = ~avg_high, type = "scatter", mode = "lines+markers", 
+                     alpha = 0.8, 
+                     color = ~year) %>% 
+                layout(
+                  title = "Average Daily Maximum Temperature in New York State, 1981 - 2010", 
+                  xaxis = list(title = "Day"), 
+                  yaxis = list(title = "Average Max Temperature (deg. C)")
+                  )
+
+temp_plot_low <- plot_ly(temp_data, x = ~time, y = ~avg_low, type = "scatter", mode = "lines+markers", 
+                     alpha = 0.4, 
+                     color = ~year) %>% 
+                layout(
+                  title = "Average Daily Minimum Temperature in New York State, 1981 - 2010", 
+                  xaxis = list(title = "Day"), 
+                  yaxis = list(title = "Average Min Temperature (deg. C)")
+                  )
+
+temp_plot_high
+temp_plot_low
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+precip_data <- noaa_data_cleaned %>% 
+  group_by(year,m) %>% 
+  summarise(total_precip = sum(prcp, na.rm = TRUE), mean_precip = mean(prcp, na.rm = TRUE)) %>% 
+  na.omit() %>% 
+  mutate(month = as.factor(m)) 
+
+precip_plot <- plot_ly(precip_data, y = ~mean_precip, color = ~month, type = "box", colors = "Set2") %>% 
+  layout(title = "Average Monthly Precipitation in New York State, 1981 -2010", 
+         xaxis = list(title = "Month"),
+         yaxis = list(title = "Precipitation (mm)"))
+
+precip_plot
+
+```
+
+### Chart C
+
+```{r snow}
+snow_data <- noaa_data_cleaned %>% 
+  group_by(year, m, d) %>% 
+  summarise(total_snow = sum(snow, na.rm = TRUE)) %>% 
+  mutate(snow_days = ifelse(total_snow > 0, 1, 0)) %>% 
+  group_by(year) %>% 
+  summarise(num_days_snow = sum(snow_days, na.rm = TRUE)) 
+
+snow_plot <- plot_ly(snow_data, x = ~year, y = ~num_days_snow, color = ~year, type = "bar") %>% 
+  layout(title = "Number of Days with Snow in New York State, 1981 - 2010", 
+         xaxis = list(title = "Year"), 
+         yaxis = list(title = "Number of Days"))
+
+snow_plot
+```
+
+```{r}
+rmarkdown::render("noaa_plots.Rmd", output_format = "flex_dashboard")
+```
+

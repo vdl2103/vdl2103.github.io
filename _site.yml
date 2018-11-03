@@ -5,9 +5,13 @@ navbar:
   right:
     - text: "About"
       href: about.html
+    - text: "NOAA Plots"
+      href: noaa_plots.html
     - icon: fa-envelope fa-lg
       href: mailto:<tory.lynch@gmail.com>
     - icon: fa-github fa-lg
       href: http://github.com/vdl2103
+    - icon: fa-institution
+      href: http://www.mailman.columbia.edu/research/climate-and-health-program/students
 output:
   html_document

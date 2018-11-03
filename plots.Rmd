@@ -1,0 +1,52 @@
+---
+title: "New York State NOAA Weather Data (1981-2010)"
+---
+
+###### Visualizing NOAA data over time 
+
+```{r echo=FALSE, include = FALSE}
+library(tidyverse)
+library(viridis)
+library(p8105.datasets)
+library(plotly)
+library(rnoaa)
+```
+
+The highest temperature ever recorded in New York State is 43 degrees Celsius and the lowest recorded is -47 degrees Celsius, according to the National Climatic Data Center. Temperature observations above and below -47 and 43 degrees Celsius were removed, therefore, under the assumption that values outside that range reflect inaccurate measurements. Precipitation observations that were greater than the highest daily precipitation seen in New York state (~14 inches) were also removed.  
+
+```{r clean data, echo=FALSE}
+#NOAA precip data
+ data("ny_noaa")
+
+noaa_data_cleaned <- ny_noaa %>% 
+  separate(date, c("y", "m", "d")) %>% 
+  mutate_at(vars(y:tmin), funs(as.numeric)) %>% 
+  mutate_at(vars(prcp, tmax:tmin), funs(./10)) %>% #convert precip and temp data into mm and deg C, respectively
+  rename(year = y) %>% 
+  select(-snwd) %>% 
+  filter(tmax < 43 & tmax > -47) %>% #remove inaccurate max temp observations 
+  filter(tmin > -47 & tmin < 43) %>% #remove inaccurate min temp observations
+  filter(prcp < 280) #remove inaccurate precip observations 
+```
+
+```{r plot 1: median high temp over time - summer months}
+noaa_data_cleaned %>% 
+  filter(m %in% c(5,6,7,8,9)) %>% 
+  group_by(year,m,d) %>% 
+  summarise(avg_high = mean(tmax, na.rm = TRUE)) %>% 
+  na.omit() %>% 
+  mutate(day = d/31) %>% 
+  unite("day_mo", c("m", "day"), sep = ".") %>% 
+  #mutate_at(vars(day_mo), funs(as.numeric)) %>% 
+  plot_ly(x = ~day_mo, y = ~avg_high, type = "scatter", mode = "markers", 
+          alpha = 0.5, 
+          color = ~year)
+
+noaa_data_cleaned %>% 
+  group_by(m) %>% 
+  na.omit() %>% 
+  mutate(month = as.factor(m)) %>% 
+  plot_ly(y = ~prcp, color = ~month, type = "box", colors = "Set2")
+
+```
+
